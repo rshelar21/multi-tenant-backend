@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import databaseConfig from './config/database.config';
 import appConfig from './config/app.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module';
+import { UserRolesModule } from './user-roles/user-roles.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -30,6 +32,8 @@ const ENV = process.env.NODE_ENV;
         database: configService.get('database.name'),
       }),
     }),
+    UsersModule,
+    UserRolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
