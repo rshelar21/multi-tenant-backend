@@ -10,13 +10,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class CreateUserDto {
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(3)
-  @MaxLength(96)
-  name: string;
-
+export class SignInDto {
   @IsEmail()
   @IsNotEmpty()
   @MinLength(3)
@@ -25,22 +19,11 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(9)
+  @MinLength(6)
   @MaxLength(96)
   @Matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/, {
     message:
-      'Minimum eight characters, at least one letter, one number and one special character',
+      'Minimum 6 characters, at least one letter, one number and one special character',
   })
   password: string;
-
-  @IsArray()
-  @ArrayNotEmpty()
-  @ArrayUnique()
-  roles: number[];
-
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(3)
-  @MaxLength(96)
-  username: string;
 }

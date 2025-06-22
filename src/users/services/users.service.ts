@@ -8,14 +8,21 @@ import { User } from '../user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { UserRolesService } from 'src/user-roles/services/user-roles.service';
-
+import { HashingProvider } from 'src/auth/providers/hashing.provider';
+import { instanceToPlain } from 'class-transformer';
+import { Request, Response } from 'express';
+import { GenerateTokensProvider } from 'src/auth/providers/generate-tokens.provider';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
+    private readonly hashingProvider: HashingProvider,
+
     private readonly userRolesService: UserRolesService,
+
+    private readonly generateTokensProvider: GenerateTokensProvider,
   ) {}
 
   public async getAllUsers() {
@@ -52,13 +59,24 @@ export class UsersService {
 
   public async createUser(createUserDto: CreateUserDto) {
     try {
+      // const defaultRole = [3]; // User
       const existingUser = await this.userRepository.findOneBy({
         email: createUserDto.email,
       });
-
       if (existingUser) {
         throw new BadRequestException('an user with this email already exists');
       }
+
+      const existingUsername = await this.userRepository.findOneBy({
+        username: createUserDto?.username,
+      });
+
+      if (existingUsername) {
+        throw new BadRequestException(
+          'an user with this username already exists',
+        );
+      }
+
       const roles = await this.userRolesService.getRoles({
         roleIds: createUserDto.roles,
       });
@@ -66,18 +84,61 @@ export class UsersService {
       if (roles.count === 0) {
         throw new BadRequestException('Roles not found');
       }
+      const newPassord = await this.hashingProvider.hashPassword(
+        createUserDto?.password,
+      );
 
       const user = await this.userRepository.create({
         ...createUserDto,
         roles: roles.data,
+        password: newPassord,
       });
 
-      return await this.userRepository.save(user);
+      const newuser = await this.userRepository.save(user);
+      return instanceToPlain(newuser);
     } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
       throw new InternalServerErrorException(
         'Failed to create user',
         err.message,
       );
     }
+  }
+
+  public async findUserByEmail(email: string) {
+    const user = await this.userRepository.findOneBy({
+      email,
+    });
+
+    if (!user) {
+      throw new BadRequestException('user not found');
+    }
+
+    return user;
+  }
+
+  public async getMe(
+    req: Request & {
+      user?: User;
+    },
+    res: Response,
+  ) {
+    const user = req?.user;
+
+    const tokens = await this.generateTokensProvider.generateTokens(user);
+
+    res
+      .cookie('refreshToken', tokens?.refreshToken, {
+        httpOnly: true, // JS can't access this cookie
+        // secure: true, // use HTTPS
+        // sameSite: 'lax', // CSRF protection
+        maxAge: 30 * 60 * 1000, // 1 day
+      })
+      .json({
+        user,
+        accessToken: tokens?.accessToken,
+      });
   }
 }

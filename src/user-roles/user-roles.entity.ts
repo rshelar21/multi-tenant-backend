@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
+  ManyToMany,
 } from 'typeorm';
 import { UserRolesType, UserRolesIdType } from './enums/user-roles.enum';
 import { User } from 'src/users/user.entity';
@@ -33,16 +34,12 @@ export class UserRoles {
   })
   roleType: number;
 
-  @ManyToOne(() => User, (user) => user.roles, {
+  @ManyToMany(() => User, (user) => user.roles, {
     eager: true,
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'userId' })
-  user: User;
-
-  @Column({ nullable: true, type: 'uuid' })
-  userId: string;
+  user: User[];
 
   @CreateDateColumn()
   createdAt: Date;

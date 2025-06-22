@@ -1,4 +1,4 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import {
   Column,
   PrimaryGeneratedColumn,
@@ -7,9 +7,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
-import {UserRoles} from "src/user-roles/user-roles.entity"
+import { UserRoles } from 'src/user-roles/user-roles.entity';
 
 @Entity()
 export class User {
@@ -30,6 +31,14 @@ export class User {
     nullable: false,
     length: 96,
   })
+  username: string;
+
+  @Column({
+    type: 'varchar',
+    unique: true,
+    nullable: false,
+    length: 96,
+  })
   email: string;
 
   @Column({
@@ -40,14 +49,13 @@ export class User {
   @Exclude()
   password: string;
 
-  @OneToMany(() => UserRoles, (role) => role.user)
-  roles: UserRoles[]
-
+  @ManyToMany(() => UserRoles, (role) => role.user)
+  @JoinTable()
+  roles: UserRoles[];
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
 }
