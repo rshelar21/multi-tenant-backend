@@ -14,6 +14,10 @@ import { RateLimitCreator } from './global/middleware';
 import { AuthMiddleware } from 'src/auth/middlewares/auth.middleware';
 import jwtConfig from './config/jwt.config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { CategoryModule } from './category/category.module';
+import { ProductsModule } from './products/products.module';
+import { TagsModule } from './tags/tags.module';
+import { PaginatioModule } from './global/pagination/pagination.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -70,12 +74,15 @@ const ENV = process.env.NODE_ENV;
     UsersModule,
     UserRolesModule,
     AuthModule,
+    CategoryModule,
+    ProductsModule,
+    TagsModule,
+    PaginatioModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {
-  constructor(private readonly jwtService: JwtService) {}
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(RateLimitCreator(60000, 60))

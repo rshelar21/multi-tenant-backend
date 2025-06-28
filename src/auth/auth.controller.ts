@@ -10,9 +10,8 @@ import {
 import { AuthService } from './providers/auth.service';
 import { SignUpDto } from './dto/signUp.dto';
 import { SignInDto } from './dto/signIn.dto';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
-import { User } from 'src/users/user.entity';
 import { RequestType } from '../global/types';
 
 @Controller('auth')

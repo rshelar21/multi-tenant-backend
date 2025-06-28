@@ -1,0 +1,145 @@
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { Category } from '../category.entity';
+import { SubCategory } from '../sub-category.entity';
+import {
+  CreateCategoryDto,
+  CreateSubCategoryDto,
+  CreateManyCategoryDto,
+  CreateManySubCategoryDto,
+} from '../dto';
+
+@Injectable()
+export class SubCategoryService {
+  constructor(
+    @InjectRepository(Category)
+    private readonly categoryReposity: Repository<Category>,
+
+    @InjectRepository(SubCategory)
+    private readonly subCategoryReposity: Repository<SubCategory>,
+
+    private dataSource: DataSource,
+  ) {}
+
+  public async getAllSubCategories() {
+    try {
+      const [data, count] = await this.subCategoryReposity.findAndCount();
+      return { data, count };
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException(
+        'Failed to get categories',
+        err.message,
+      );
+    }
+  }
+
+  public async getSingleSubCategory(id: string) {
+    try {
+      return this.subCategoryReposity?.findOneBy({
+        id,
+      });
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException(
+        'Failed to get categories',
+        err.message,
+      );
+    }
+  }
+
+  public async createSubCategory(createSubCategoryDto: CreateSubCategoryDto) {
+    try {
+      const existingCategory = await this.subCategoryReposity.findOneBy({
+        name: createSubCategoryDto?.name,
+      });
+
+      if (existingCategory) {
+        throw new BadRequestException('Sub-Category already exist');
+      }
+
+      const createSubCategory = await this.subCategoryReposity.create({
+        name: createSubCategoryDto?.name,
+        slug: createSubCategoryDto?.slug,
+      });
+
+      return this.subCategoryReposity.save(createSubCategory);
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException(
+        'Failed to create categories',
+        err.message,
+      );
+    }
+  }
+
+  public async createManySubCategory(
+    createManySubCategoryDto: CreateManySubCategoryDto,
+  ) {
+    // Create Query Runner Instance
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      // Connect the query ryunner to the datasource
+      await queryRunner.connect();
+
+      // Start the transaction
+      await queryRunner.startTransaction();
+
+      for (let c of createManySubCategoryDto?.category) {
+        const newUser = queryRunner.manager.create(SubCategory, c); // entityClass, data
+        await queryRunner.manager.save(newUser);
+      }
+
+      // if success
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors lets rollback the changes we made
+      await queryRunner.rollbackTransaction();
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException(
+        'Failed to create categories',
+        err.message,
+      );
+    } finally {
+      // you need to release a queryRunner which was manually instantiated
+      await queryRunner.release();
+    }
+  }
+
+  public async deteleSubCategory(id: string) {
+    try {
+      const existingCategory = await this.subCategoryReposity.findOneBy({
+        id,
+      });
+
+      if (!existingCategory) {
+        throw new BadRequestException('Sub-Category not found');
+      }
+
+      return await this.subCategoryReposity.delete(id);
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException(
+        'Failed to delete categories',
+        err.message,
+      );
+    }
+  }
+}
