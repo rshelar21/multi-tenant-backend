@@ -1,5 +1,5 @@
 import { GenericQueryParams } from 'src/global/dto/generic-query-params.dto';
-import { IsString, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class ProductsQueryParms extends GenericQueryParams {
   @IsOptional()
@@ -23,4 +23,8 @@ export class ProductsQueryParms extends GenericQueryParams {
   @IsOptional()
   // @ValidateNested({ each: true })
   tags?: string[];
+
+  @IsOptional()
+  @IsString()
+  tenantSlug?: string;
 }

@@ -25,7 +25,7 @@ export class AuthService {
   public async signIn(signInDto: SignInDto, res: Response) {
     try {
       const user = await this.usersService.findUserByEmail(signInDto.email);
-   
+
       if (!user) {
         throw new BadRequestException('User not found');
       }
@@ -70,7 +70,7 @@ export class AuthService {
     try {
       const user = await this.usersService.createUser({
         ...signInDto,
-        roles: [3], // default role
+        roles: signInDto?.roles || [3], // default role
       });
 
       const token = await this.generateTokenProvider.generateTokens(user);
@@ -103,7 +103,7 @@ export class AuthService {
   public logout(req: RequestType, res: Response) {
     try {
       const userId = req?.user;
-   
+
       res.clearCookie('refreshToken').json({
         message: 'Logout success!',
       });

@@ -5,10 +5,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Tags } from '../tags.entity';
-import { In, Repository, FindOptionsWhere } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateTagDto } from '../dto/create-tag.dto';
 import { GenericQueryParams } from 'src/global/dto/generic-query-params.dto';
-import { DEFAULT_PAGE_LIMIT } from 'src/global/constants/query-params';
 import { PaginationProvider } from 'src/global/pagination/services/pagination.provider';
 
 @Injectable()
@@ -85,6 +84,7 @@ export class TagsService {
       throw new InternalServerErrorException('Failed to fetched', err.message);
     }
   }
+
   public async createTag(createTagDto: CreateTagDto) {
     try {
       const existingTag = await this.tagsRepository.findOneBy({
@@ -105,6 +105,7 @@ export class TagsService {
       throw new InternalServerErrorException('Failed to create', err.message);
     }
   }
+  
   public async deleteTag(id: string) {
     try {
     } catch (err) {

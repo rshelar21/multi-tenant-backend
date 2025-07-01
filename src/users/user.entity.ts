@@ -7,8 +7,13 @@ import {
   UpdateDateColumn,
   ManyToMany,
   JoinTable,
+  OneToOne,
+  JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { UserRoles } from 'src/user-roles/user-roles.entity';
+import { Tenant } from 'src/tenants/tenants.entity';
+import { Products } from 'src/products/products.entity';
 
 @Entity()
 export class User {
@@ -47,9 +52,21 @@ export class User {
   @Exclude()
   password: string;
 
-  @ManyToMany(() => UserRoles, (role) => role.user)
+  @ManyToMany(() => UserRoles, (role) => role.user, {
+    eager: true,
+  })
   @JoinTable()
   roles: UserRoles[];
+
+  @OneToOne(() => Tenant, (tenant) => tenant.user, {
+    eager: true,
+    cascade: true,
+  })
+  @JoinColumn()
+  tenant: Tenant;
+
+  @OneToMany(() => Products, (products) => products.user)
+  product: Products[];
 
   @CreateDateColumn()
   createdAt: Date;

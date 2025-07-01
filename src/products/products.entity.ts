@@ -5,13 +5,13 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { RefundPolicy } from './enums/refund-policy.enum';
 import { SubCategory } from 'src/category/sub-category.entity';
 import { Tags } from 'src/tags/tags.entity';
+import { User } from 'src/users/user.entity';
 
 @Entity()
 export class Products {
@@ -67,6 +67,9 @@ export class Products {
   })
   @JoinTable()
   tags: Tags[];
+
+  @ManyToOne(() => User, (user) => user.product)
+  user: User;
 
   @CreateDateColumn()
   createDate: Date;

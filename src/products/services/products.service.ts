@@ -8,11 +8,10 @@ import {
   Repository,
   FindOptionsWhere,
   Between,
-  MoreThan,
   MoreThanOrEqual,
-  LessThan,
   LessThanOrEqual,
   In,
+  FindOptionsRelations,
 } from 'typeorm';
 import { Products } from '../products.entity';
 import { CreateProductDto } from '../dto/create-product.dto';
@@ -20,7 +19,7 @@ import { SubCategoryService } from 'src/category/services/sub-category.service';
 import { ProductsQueryParms } from '../dto/product-query-params.dto';
 import { TagsService } from 'src/tags/services/tags.service';
 import { PaginationProvider } from 'src/global/pagination/services/pagination.provider';
-
+import { RequestType } from 'src/global/types';
 @Injectable()
 export class ProductsService {
   constructor(
@@ -34,13 +33,23 @@ export class ProductsService {
     private readonly paginationProvider: PaginationProvider,
   ) {}
 
-  public async getAllProducts(productsQueryParms: ProductsQueryParms) {
+  public async getAllProducts(
+    req: RequestType,
+    productsQueryParms: ProductsQueryParms,
+  ) {
     try {
       const where: FindOptionsWhere<Products> = {};
-      const { maxPrice, minPrice, parentSlug, slug, tags, limit, page } =
-        productsQueryParms;
-
-      console.log([tags].flat(2), 'tags');
+      const {
+        maxPrice,
+        minPrice,
+        parentSlug,
+        slug,
+        tags,
+        limit,
+        page,
+        access,
+        tenantSlug,
+      } = productsQueryParms;
 
       if (parentSlug || slug) {
         where.category = {};
@@ -68,6 +77,23 @@ export class ProductsService {
           name: In(list),
         };
       }
+
+      if (tenantSlug) {
+        where.user = {
+          tenant: {
+            slug: tenantSlug,
+          },
+        };
+      }
+
+      if (req.user && access !== 'admin') {
+        where.user = {
+          id: req.user.id,
+        };
+      }
+      const relations: FindOptionsRelations<Products> = {
+        user: true,
+      };
       const products = await this.paginationProvider.paginateQuery(
         {
           limit,
@@ -75,10 +101,13 @@ export class ProductsService {
         },
         this.productsRepository,
         where,
+        relations,
       );
       return products;
       // const [data, count] = await this.productsRepository.findAndCount({
-      //   where,
+      //   relations: {
+      //     user: true,
+      //   },
       // });
       // return { data, count };
     } catch (err) {
@@ -102,7 +131,10 @@ export class ProductsService {
     }
   }
 
-  public async createProduct(createProductDto: CreateProductDto) {
+  public async createProduct(
+    req: RequestType,
+    createProductDto: CreateProductDto,
+  ) {
     try {
       const existingProduct = await this.productsRepository.findOneBy({
         name: createProductDto?.name,
@@ -132,6 +164,11 @@ export class ProductsService {
       if (category) {
         newProduct.category = category;
       }
+
+      if (req.user) {
+        newProduct.user = req?.user;
+      }
+
       return await this.productsRepository.save(newProduct);
     } catch (err) {
       if (err instanceof BadRequestException) {

@@ -8,6 +8,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import jwtConfig from 'src/config/jwt.config';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { TenantsModule } from 'src/tenants/tenants.module';
 
 @Module({
   controllers: [UsersController],
@@ -16,6 +17,7 @@ import { JwtModule } from '@nestjs/jwt';
   imports: [
     TypeOrmModule.forFeature([User]),
     UserRolesModule,
+    TenantsModule,
     forwardRef(() => AuthModule),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()), // register JwtModule

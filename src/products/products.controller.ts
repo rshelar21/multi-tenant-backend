@@ -6,18 +6,22 @@ import {
   Param,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ProductsService } from './services/products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductsQueryParms } from './dto/product-query-params.dto';
-
+import { RequestType } from 'src/global/types';
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  public getAllProducts(@Query() productsQueryParms: ProductsQueryParms) {
-    return this.productsService.getAllProducts(productsQueryParms);
+  public getAllProducts(
+    @Req() req: RequestType,
+    @Query() productsQueryParms: ProductsQueryParms,
+  ) {
+    return this.productsService.getAllProducts(req, productsQueryParms);
   }
 
   @Get('/:id')
@@ -26,8 +30,11 @@ export class ProductsController {
   }
 
   @Post()
-  public createProduct(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.createProduct(createProductDto);
+  public createProduct(
+    @Req() req: RequestType,
+    @Body() createProductDto: CreateProductDto,
+  ) {
+    return this.productsService.createProduct(req, createProductDto);
   }
 
   @Delete()

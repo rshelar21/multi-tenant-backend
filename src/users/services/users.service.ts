@@ -12,6 +12,7 @@ import { HashingProvider } from 'src/auth/providers/hashing.provider';
 import { instanceToPlain } from 'class-transformer';
 import { Request, Response } from 'express';
 import { GenerateTokensProvider } from 'src/auth/providers/generate-tokens.provider';
+import { Tenant } from 'src/tenants/tenants.entity';
 @Injectable()
 export class UsersService {
   constructor(
@@ -23,6 +24,8 @@ export class UsersService {
     private readonly userRolesService: UserRolesService,
 
     private readonly generateTokensProvider: GenerateTokensProvider,
+
+    // private readonly tenants
   ) {}
 
   public async getAllUsers() {
@@ -93,6 +96,14 @@ export class UsersService {
         roles: roles.data,
         password: newPassord,
       });
+
+      const tenant = new Tenant();
+      tenant.name = createUserDto?.username;
+      tenant.slug = createUserDto?.username;
+      tenant.stripeAccountId = 'TEST1';
+      tenant.stripeDetailsSubmitted = true;
+
+      user.tenant = tenant;
 
       const newuser = await this.userRepository.save(user);
       return instanceToPlain(newuser);

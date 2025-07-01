@@ -38,4 +38,9 @@ export class SignUpDto {
       'Minimum 6 characters, at least one letter, one number and one special character',
   })
   password: string;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  roles?: number[] = [3];
 }

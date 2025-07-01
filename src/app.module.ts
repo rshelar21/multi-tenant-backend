@@ -18,6 +18,7 @@ import { CategoryModule } from './category/category.module';
 import { ProductsModule } from './products/products.module';
 import { TagsModule } from './tags/tags.module';
 import { PaginatioModule } from './global/pagination/pagination.module';
+import { TenantsModule } from './tenants/tenants.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -78,6 +79,7 @@ const ENV = process.env.NODE_ENV;
     ProductsModule,
     TagsModule,
     PaginatioModule,
+    TenantsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

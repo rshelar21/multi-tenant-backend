@@ -2,10 +2,8 @@ import {
   Column,
   PrimaryGeneratedColumn,
   Entity,
-  ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-  JoinColumn,
   ManyToMany,
 } from 'typeorm';
 import { UserRolesType, UserRolesIdType } from './enums/user-roles.enum';
@@ -35,7 +33,6 @@ export class UserRoles {
   roleType: number;
 
   @ManyToMany(() => User, (user) => user.roles, {
-    eager: true,
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
