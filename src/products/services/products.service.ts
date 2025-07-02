@@ -120,8 +120,20 @@ export class ProductsService {
 
   public async getSingleProduct(id: string) {
     try {
-      return this.productsRepository?.findOneBy({
-        id,
+      return this.productsRepository?.findOne({
+        where: {
+          id: id,
+        },
+        relations: {
+          user: true,
+        },
+        select: {
+          user: {
+            tenant: true,
+            name: true,
+            roles: false,
+          },
+        },
       });
     } catch (err) {
       if (err instanceof BadRequestException) {
