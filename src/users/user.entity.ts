@@ -14,6 +14,7 @@ import {
 import { UserRoles } from 'src/user-roles/user-roles.entity';
 import { Tenant } from 'src/tenants/tenants.entity';
 import { Products } from 'src/products/products.entity';
+import { Orders } from 'src/orders/orders.entity';
 
 @Entity()
 export class User {
@@ -67,6 +68,11 @@ export class User {
 
   @OneToMany(() => Products, (products) => products.user)
   product: Products[];
+
+  @OneToMany(() => Orders, (orders) => orders.user, {
+    cascade: true,
+  })
+  orders: Orders[];
 
   @CreateDateColumn()
   createdAt: Date;

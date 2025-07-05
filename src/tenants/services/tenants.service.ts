@@ -39,9 +39,21 @@ export class TenantsService {
     }
   }
 
+  public async getSingleTenantBySlug(slug: string) {
+    try {
+      return this.tenantRepository?.findOneBy({
+        slug,
+      });
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException('Failed to fetched', err.message);
+    }
+  }
+
   public async deleteTenant(id: string) {
     try {
-
     } catch (err) {
       if (err instanceof BadRequestException) {
         throw err;

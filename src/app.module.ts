@@ -19,6 +19,8 @@ import { ProductsModule } from './products/products.module';
 import { TagsModule } from './tags/tags.module';
 import { PaginatioModule } from './global/pagination/pagination.module';
 import { TenantsModule } from './tenants/tenants.module';
+import { PaymentsModule } from './payments/payments.module';
+import { OrdersModule } from './orders/orders.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -80,6 +82,8 @@ const ENV = process.env.NODE_ENV;
     TagsModule,
     PaginatioModule,
     TenantsModule,
+    PaymentsModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -96,6 +100,7 @@ export class AppModule {
         '/users/me',
         '/auth/sign-in',
         '/auth/sign-up',
+        'stripe/webhook',
       )
       .forRoutes('*');
   }

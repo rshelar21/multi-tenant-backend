@@ -12,6 +12,7 @@ import { RefundPolicy } from './enums/refund-policy.enum';
 import { SubCategory } from 'src/category/sub-category.entity';
 import { Tags } from 'src/tags/tags.entity';
 import { User } from 'src/users/user.entity';
+import { Orders } from 'src/orders/orders.entity';
 
 @Entity()
 export class Products {
@@ -70,6 +71,10 @@ export class Products {
 
   @ManyToOne(() => User, (user) => user.product)
   user: User;
+
+  @ManyToMany(() => Orders, (orders) => orders.product)
+  @JoinTable()
+  orders: Orders[];
 
   @CreateDateColumn()
   createDate: Date;

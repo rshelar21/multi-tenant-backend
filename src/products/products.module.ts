@@ -16,5 +16,6 @@ import { PaginatioModule } from 'src/global/pagination/pagination.module';
     TagsModule,
     PaginatioModule,
   ],
+  exports: [ProductsService],
 })
 export class ProductsModule {}

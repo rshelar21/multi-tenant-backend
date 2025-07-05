@@ -24,6 +24,11 @@ export class ProductsController {
     return this.productsService.getAllProducts(req, productsQueryParms);
   }
 
+  @Get('/many-products')
+  public getManyProducts(@Query() productsQueryParms: { ids: string[] }) {
+    return this.productsService.getManyProducts(productsQueryParms.ids);
+  }
+
   @Get('/:id')
   public getSpecificProduct(@Param() params: { id: string }) {
     return this.productsService.getSingleProduct(params?.id);

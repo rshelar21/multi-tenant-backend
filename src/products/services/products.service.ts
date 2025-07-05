@@ -49,6 +49,7 @@ export class ProductsService {
         page,
         access,
         tenantSlug,
+        ids,
       } = productsQueryParms;
 
       if (parentSlug || slug) {
@@ -86,14 +87,21 @@ export class ProductsService {
         };
       }
 
+      if (ids) {
+        const idsList = [ids].flat(2);
+        where.id = In(idsList);
+      }
+
       if (req.user && access !== 'admin') {
         where.user = {
           id: req.user.id,
         };
       }
+
       const relations: FindOptionsRelations<Products> = {
         user: true,
       };
+
       const products = await this.paginationProvider.paginateQuery(
         {
           limit,
@@ -104,12 +112,6 @@ export class ProductsService {
         relations,
       );
       return products;
-      // const [data, count] = await this.productsRepository.findAndCount({
-      //   relations: {
-      //     user: true,
-      //   },
-      // });
-      // return { data, count };
     } catch (err) {
       if (err instanceof BadRequestException) {
         throw err;
@@ -123,6 +125,31 @@ export class ProductsService {
       return this.productsRepository?.findOne({
         where: {
           id: id,
+        },
+        relations: {
+          user: true,
+        },
+        select: {
+          user: {
+            tenant: true,
+            name: true,
+            roles: false,
+          },
+        },
+      });
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException('Failed to fetched', err.message);
+    }
+  }
+
+  public async getManyProducts(ids: string[]) {
+    try {
+      return await this.productsRepository.find({
+        where: {
+          id: In([ids].flat(2)),
         },
         relations: {
           user: true,
@@ -171,6 +198,7 @@ export class ProductsService {
         const { data } = await this.tagsService.getTagsByIds(
           createProductDto?.tags,
         );
+
         newProduct.tags = data;
       }
       if (category) {

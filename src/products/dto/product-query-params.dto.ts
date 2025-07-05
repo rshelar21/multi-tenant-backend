@@ -1,5 +1,5 @@
 import { GenericQueryParams } from 'src/global/dto/generic-query-params.dto';
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsArray } from 'class-validator';
 
 export class ProductsQueryParms extends GenericQueryParams {
   @IsOptional()
@@ -27,4 +27,8 @@ export class ProductsQueryParms extends GenericQueryParams {
   @IsOptional()
   @IsString()
   tenantSlug?: string;
+
+  @IsString({ each: true })
+  @IsOptional()
+  ids?: string[];
 }
