@@ -31,16 +31,16 @@ export class Tenant {
 
   @Column({
     type: 'varchar',
-    nullable: false,
-  })
-  stripeAccountId: string;
-
-  @Column({
-    type: 'varchar',
     nullable: true,
     length: 512,
   })
   storeImg?: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: false,
+  })
+  stripeAccountId: string;
 
   @Column({
     type: 'boolean',

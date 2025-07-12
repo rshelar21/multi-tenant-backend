@@ -15,10 +15,15 @@ export class TenantsController {
     return this.tenantsService.getSingleTenant(params?.id);
   }
 
-//   @Post()
-//   public createTag(@Body() createTagDto: CreateTagDto) {
-//     return this.tenantsService.createTag(createTagDto);
-//   }
+  @Get('/slug/:slug')
+  public getSingleTenantBySlug(@Param() params: { slug: string }) {
+    return this.tenantsService.getSingleTenantBySlug(params?.slug);
+  }
+
+  //   @Post()
+  //   public createTag(@Body() createTagDto: CreateTagDto) {
+  //     return this.tenantsService.createTag(createTagDto);
+  //   }
 
   @Delete()
   public deleteTenant(@Body() id: string) {

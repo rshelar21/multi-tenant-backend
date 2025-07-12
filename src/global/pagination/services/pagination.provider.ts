@@ -5,6 +5,7 @@ import {
   ObjectLiteral,
   Repository,
   FindOptionsRelations,
+  FindOptionsSelect,
 } from 'typeorm';
 import { Paginated } from '../interface/pagination.interface';
 
@@ -17,6 +18,7 @@ export class PaginationProvider {
     repository: Repository<T>,
     where?: FindOptionsWhere<T>,
     relations?: FindOptionsRelations<T>,
+    select?: FindOptionsSelect<T>,
   ): Promise<Paginated<T>> {
     // find-count
     const [data, count] = await repository.findAndCount({
@@ -24,6 +26,7 @@ export class PaginationProvider {
       take: paginationQuery.limit,
       where,
       relations,
+      select,
     });
 
     // calc page numbers

@@ -5,6 +5,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -13,6 +14,7 @@ import { SubCategory } from 'src/category/sub-category.entity';
 import { Tags } from 'src/tags/tags.entity';
 import { User } from 'src/users/user.entity';
 import { Orders } from 'src/orders/orders.entity';
+import { Reviews } from 'src/reviews/reviews.entity';
 
 @Entity()
 export class Products {
@@ -75,6 +77,10 @@ export class Products {
   @ManyToMany(() => Orders, (orders) => orders.product)
   @JoinTable()
   orders: Orders[];
+
+  @OneToMany(() => Reviews, (reviews) => reviews.product)
+  @JoinTable()
+  reviews: Reviews[];
 
   @CreateDateColumn()
   createDate: Date;

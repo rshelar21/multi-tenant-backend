@@ -5,13 +5,15 @@ import {
   InternalServerErrorException,
   RawBodyRequest,
 } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
 import Stripe from 'stripe';
+import { Request } from 'express';
+import { ConfigType } from '@nestjs/config';
+import appConfig from 'src/config/app.config';
 import stripeConfig from 'src/config/stripe.config';
 import { RequestType } from 'src/global/types';
 import { UsersService } from 'src/users/services/users.service';
 import { OrdersService } from 'src/orders/services/orders.service';
-import { Request } from 'express';
+import { TenantsService } from 'src/tenants/services/tenants.service';
 
 @Injectable()
 export class StripeService {
@@ -21,8 +23,12 @@ export class StripeService {
     @Inject(stripeConfig.KEY)
     private readonly stripeConfiguration: ConfigType<typeof stripeConfig>,
 
+    @Inject(appConfig.KEY)
+    private readonly appConfiguration: ConfigType<typeof appConfig>,
+
     private readonly usersService: UsersService,
     private readonly ordersService: OrdersService,
+    private readonly tenantService: TenantsService,
   ) {
     this.stripe = new Stripe(
       this.stripeConfiguration.stripeSecretKey as string,
@@ -78,16 +84,14 @@ export class StripeService {
             throw new BadRequestException('User not found');
           }
 
-          const session = await this.stripe.checkout.sessions.retrieve(
-            data.id,
-            {
-              expand: ['line_items'],
-            },
-          );
-          
-          const lineItems = session.line_items;
+          // const session = await this.stripe.checkout.sessions.retrieve(
+          //   data.id,
+          //   {
+          //     expand: ['line_items'],
+          //   },
+          // );
 
-        
+          // const lineItems = session.line_items;
 
           return await this.ordersService.createOrder({
             stripeCheckoutSessionId: data?.id,
@@ -103,8 +107,58 @@ export class StripeService {
             err.message,
           );
         }
+      case 'account.updated':
+        const acc = event.data.object as Stripe.Account;
+
+        try {
+          await this.tenantService.updateTenantBySlug(
+            acc?.id,
+            acc?.details_submitted,
+          );
+        } catch (err) {
+          if (err instanceof BadRequestException) {
+            throw err;
+          }
+          throw new InternalServerErrorException(
+            'Failed to create session',
+            err.message,
+          );
+        }
+
       default:
-      console.log(`Unhandled event type ${event.type}`);
+        console.log(`Unhandled event type ${event.type}`);
+    }
+  }
+
+  public async postCreateAccount(req: RequestType) {
+    try {
+      if (!req?.user) {
+        throw new BadRequestException('UnAuthorised');
+      }
+      const tenant = req.user?.tenant;
+
+      const accountLink = await this.stripe.accountLinks.create({
+        account: tenant?.stripeAccountId,
+        type: 'account_onboarding',
+        refresh_url: `${this.appConfiguration.frontendUrl}/admin`,
+        return_url: `${this.appConfiguration.frontendUrl}/admin`,
+      });
+
+      if (!accountLink?.url) {
+        throw new BadRequestException('Failed to create link');
+      }
+
+      return {
+        url: accountLink?.url,
+      };
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException(
+        'Failed to create user',
+        err.message,
+      );
     }
   }
 }

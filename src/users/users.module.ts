@@ -9,6 +9,7 @@ import jwtConfig from 'src/config/jwt.config';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { TenantsModule } from 'src/tenants/tenants.module';
+import stripeConfig from 'src/config/stripe.config';
 
 @Module({
   controllers: [UsersController],
@@ -21,6 +22,7 @@ import { TenantsModule } from 'src/tenants/tenants.module';
     forwardRef(() => AuthModule),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()), // register JwtModule
+    ConfigModule.forFeature(stripeConfig),
   ],
 })
 export class UsersModule {}

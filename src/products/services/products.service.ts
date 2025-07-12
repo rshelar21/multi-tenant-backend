@@ -92,14 +92,15 @@ export class ProductsService {
         where.id = In(idsList);
       }
 
-      if (req.user && access !== 'admin') {
-        where.user = {
-          id: req.user.id,
-        };
-      }
+      // if (req.user && access !== 'admin') {
+      //   where.user = {
+      //     id: req.user.id,
+      //   };
+      // }
 
       const relations: FindOptionsRelations<Products> = {
         user: true,
+        reviews: true,
       };
 
       const products = await this.paginationProvider.paginateQuery(
@@ -128,6 +129,7 @@ export class ProductsService {
         },
         relations: {
           user: true,
+          reviews: true,
         },
         select: {
           user: {

@@ -1,6 +1,5 @@
-import { Body, Controller, Post, RawBodyRequest, Req } from '@nestjs/common';
+import { Controller, Post, RawBodyRequest, Req } from '@nestjs/common';
 import { RequestType } from 'src/global/types';
-import { CreateCheckoutDto } from './dto/create-checkout.dto.';
 import { StripeService } from './services/stripe.service';
 import { Request } from 'express';
 
@@ -10,6 +9,11 @@ export class StripeWebhookController {
 
   @Post('/webhook')
   public postStripeWebhook(@Req() req: RawBodyRequest<Request>) {
-    return this.stripeService.processWebhook(req)
+    return this.stripeService.processWebhook(req);
+  }
+
+  @Post('/account-link')
+  public postCreateAccount(@Req() req: RequestType) {
+    return this.stripeService.postCreateAccount(req);
   }
 }

@@ -1,5 +1,7 @@
+import Stripe from 'stripe';
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -13,8 +15,11 @@ import { instanceToPlain } from 'class-transformer';
 import { Request, Response } from 'express';
 import { GenerateTokensProvider } from 'src/auth/providers/generate-tokens.provider';
 import { Tenant } from 'src/tenants/tenants.entity';
+import stripeConfig from 'src/config/stripe.config';
+import { ConfigType } from '@nestjs/config';
 @Injectable()
 export class UsersService {
+  private stripe: Stripe;
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -25,8 +30,15 @@ export class UsersService {
 
     private readonly generateTokensProvider: GenerateTokensProvider,
 
+    @Inject(stripeConfig.KEY)
+    private readonly stripeConfiguration: ConfigType<typeof stripeConfig>,
+
     // private readonly tenants
-  ) {}
+  ) {
+    this.stripe = new Stripe(
+      this.stripeConfiguration.stripeSecretKey as string,
+    );
+  }
 
   public async getAllUsers() {
     try {
@@ -97,11 +109,19 @@ export class UsersService {
         password: newPassord,
       });
 
+      const account = await this.stripe.accounts.create({
+        email: createUserDto?.email,
+      });
+
+      if (!account?.id) {
+        throw new BadRequestException('Failed to create stripe account');
+      }
+
       const tenant = new Tenant();
       tenant.name = createUserDto?.username;
       tenant.slug = createUserDto?.username;
-      tenant.stripeAccountId = 'TEST1';
-      tenant.stripeDetailsSubmitted = true;
+      tenant.stripeAccountId = account?.id;
+      tenant.stripeDetailsSubmitted = false;
 
       user.tenant = tenant;
 
@@ -119,8 +139,17 @@ export class UsersService {
   }
 
   public async findUserByEmail(email: string) {
-    const user = await this.userRepository.findOneBy({
-      email,
+    const user = await this.userRepository.findOne({
+      where: {
+        email,
+      },
+      select: {
+        email: true,
+        password: true,
+        id: true,
+        name: true,
+        tenant: true,
+      },
     });
 
     if (!user) {

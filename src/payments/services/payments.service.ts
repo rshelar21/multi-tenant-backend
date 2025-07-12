@@ -13,6 +13,7 @@ import { CreateCheckoutDto } from '../dto/create-checkout.dto.';
 import { ProductsService } from 'src/products/services/products.service';
 import { TenantsService } from 'src/tenants/services/tenants.service';
 import { ProductMetada } from 'src/global/types/product-metadata';
+import { PLATFORM_FEE_PERCENTAGE } from 'src/global/constants/query-params';
 
 @Injectable()
 export class PaymentsService {
@@ -53,6 +54,18 @@ export class PaymentsService {
       if (!tenant) {
         throw new BadRequestException('Tenant not found!');
       }
+      if (!tenant.stripeDetailsSubmitted) {
+        throw new BadRequestException('Tenant not alloed to sell product!');
+      }
+
+      const totoalAmount = products?.reduce(
+        (acc, item) => acc + Number(item?.price) * 100,
+        0,
+      );
+
+      const platformFeeAmount = Math.round(
+        totoalAmount * (PLATFORM_FEE_PERCENTAGE / 100),
+      );
 
       const productItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
         products?.map((item) => ({
@@ -73,23 +86,30 @@ export class PaymentsService {
           },
         }));
 
-
-      const session = await this.stripe.checkout.sessions.create({
-        line_items: productItems,
-        mode: 'payment',
-        // payment_method_types: ['card'],
-        customer_email: user?.email,
-        success_url: `${this.frontendUrl}/tenants/${createCheckoutDto?.tenantSlug}/checkout?success=true`,
-        cancel_url: `${this.frontendUrl}/tenants/${createCheckoutDto?.tenantSlug}/checkout?cancel=false`,
-        invoice_creation: {
-          enabled: true,
+      const session = await this.stripe.checkout.sessions.create(
+        {
+          line_items: productItems,
+          mode: 'payment',
+          // payment_method_types: ['card'],
+          customer_email: user?.email,
+          success_url: `${this.frontendUrl}/tenants/${createCheckoutDto?.tenantSlug}/checkout?success=true`,
+          cancel_url: `${this.frontendUrl}/tenants/${createCheckoutDto?.tenantSlug}/checkout?cancel=false`,
+          invoice_creation: {
+            enabled: true,
+          },
+          metadata: {
+            userId: user?.id || '',
+            productIds: JSON.stringify(products?.map((i) => i.id)),
+            stripeAccountId: tenant?.stripeAccountId || '',
+          },
+          payment_intent_data: {
+            application_fee_amount: platformFeeAmount,
+          },
         },
-        metadata: {
-          userId: user?.id || '',
-          productIds: JSON.stringify(products?.map((i) => i.id)),
-          stripeAccountId: tenant?.stripeAccountId || '',
+        {
+          stripeAccount: tenant?.stripeAccountId,
         },
-      });
+      );
 
       if (!session.url) {
         throw new BadRequestException('Failed to create checkout session');

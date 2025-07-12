@@ -15,6 +15,7 @@ import { UserRoles } from 'src/user-roles/user-roles.entity';
 import { Tenant } from 'src/tenants/tenants.entity';
 import { Products } from 'src/products/products.entity';
 import { Orders } from 'src/orders/orders.entity';
+import { Reviews } from 'src/reviews/reviews.entity';
 
 @Entity()
 export class User {
@@ -49,6 +50,7 @@ export class User {
     type: 'varchar',
     length: 96,
     nullable: false,
+    select: false,
   })
   @Exclude()
   password: string;
@@ -73,6 +75,10 @@ export class User {
     cascade: true,
   })
   orders: Orders[];
+
+  @OneToMany(() => Reviews, (reviews) => reviews.user)
+  @JoinTable()
+  reviews: Reviews[];
 
   @CreateDateColumn()
   createdAt: Date;

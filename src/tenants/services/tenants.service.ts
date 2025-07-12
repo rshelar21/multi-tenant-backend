@@ -52,6 +52,43 @@ export class TenantsService {
     }
   }
 
+  public async updateTenantBySlug(stripeAccountId: string, data) {
+    try {
+      return await this.tenantRepository.update(
+        {
+          stripeAccountId,
+        },
+        {
+          stripeDetailsSubmitted: data,
+        },
+      );
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException('Failed to fetched', err.message);
+    }
+  }
+
+  public async updateTenant(slug: string, data) {
+    try {
+      return await this.tenantRepository.update(
+        {
+          slug,
+        },
+        {
+          ...data,
+          // stripeVerificationId
+        },
+      );
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException('Failed to fetched', err.message);
+    }
+  }
+
   public async deleteTenant(id: string) {
     try {
     } catch (err) {
