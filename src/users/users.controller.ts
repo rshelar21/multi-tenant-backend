@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   Res,
@@ -14,6 +15,7 @@ import { Request, Response } from 'express';
 import { RefreshTokenGuard } from 'src/auth/guards/refresh-token.guard';
 import { User } from './user.entity';
 import { RequestType } from 'src/global/types';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -42,5 +44,10 @@ export class UsersController {
   @Post()
   public createUser(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
+  }
+
+  @Patch()
+  public updateUser(@Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateUser(updateUserDto);
   }
 }

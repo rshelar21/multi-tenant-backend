@@ -10,6 +10,7 @@ import {
   OneToOne,
   JoinColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { UserRoles } from 'src/user-roles/user-roles.entity';
 import { Tenant } from 'src/tenants/tenants.entity';
@@ -18,6 +19,7 @@ import { Orders } from 'src/orders/orders.entity';
 import { Reviews } from 'src/reviews/reviews.entity';
 
 @Entity()
+@Index(['username', 'email'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;

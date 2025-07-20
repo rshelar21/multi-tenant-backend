@@ -92,11 +92,11 @@ export class ProductsService {
         where.id = In(idsList);
       }
 
-      // if (req.user && access !== 'admin') {
-      //   where.user = {
-      //     id: req.user.id,
-      //   };
-      // }
+      if (req.user && access !== 'admin') {
+        where.user = {
+          id: req.user.id,
+        };
+      }
 
       const relations: FindOptionsRelations<Products> = {
         user: true,

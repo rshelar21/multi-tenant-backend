@@ -1,4 +1,4 @@
-import { Controller, Post, RawBodyRequest, Req } from '@nestjs/common';
+import { Controller, Get, Post, RawBodyRequest, Req } from '@nestjs/common';
 import { RequestType } from 'src/global/types';
 import { StripeService } from './services/stripe.service';
 import { Request } from 'express';
@@ -6,6 +6,11 @@ import { Request } from 'express';
 @Controller('stripe')
 export class StripeWebhookController {
   constructor(private readonly stripeService: StripeService) {}
+
+  @Get('/revenue')
+  public getRevenueDataails(@Req() req: RequestType) {
+    return this.stripeService.getRevenueDataails(req);
+  }
 
   @Post('/webhook')
   public postStripeWebhook(@Req() req: RawBodyRequest<Request>) {

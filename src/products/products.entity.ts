@@ -8,6 +8,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { RefundPolicy } from './enums/refund-policy.enum';
 import { SubCategory } from 'src/category/sub-category.entity';

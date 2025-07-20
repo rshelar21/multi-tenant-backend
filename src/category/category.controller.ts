@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
 import { CategoryService } from './services/category.service';
 import {
   CreateCategoryDto,
@@ -7,6 +7,7 @@ import {
   CreateManyCategoryDto,
 } from './dto';
 import { SubCategoryService } from './services/sub-category.service';
+import { GenericQueryParams } from 'src/global/dto/generic-query-params.dto';
 
 @Controller('category')
 export class CategoryController {
@@ -27,8 +28,8 @@ export class CategoryController {
   }
 
   @Get('/sub-category/all')
-  public getAllSubCategories() {
-    return this.subCategoryService.getAllSubCategories();
+  public getAllSubCategories(@Query() genericQueryParams: GenericQueryParams) {
+    return this.subCategoryService.getAllSubCategories(genericQueryParams);
   }
 
   @Get('/sub-category/:id')

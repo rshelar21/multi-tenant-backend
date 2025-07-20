@@ -6,9 +6,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
+  Index,
 } from 'typeorm';
 
 @Entity()
+@Index(['slug', 'name'])
 export class Tenant {
   @PrimaryGeneratedColumn('uuid')
   id: string;

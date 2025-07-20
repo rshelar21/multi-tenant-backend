@@ -6,11 +6,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToMany,
+  Index
 } from 'typeorm';
 
 @Entity()
+@Index(['name'])
 export class Tags {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({

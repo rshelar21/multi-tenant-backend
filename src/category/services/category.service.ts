@@ -8,6 +8,7 @@ import { DataSource, In, Repository } from 'typeorm';
 import { Category } from '../category.entity';
 import { SubCategory } from '../sub-category.entity';
 import { CreateCategoryDto, CreateManyCategoryDto } from '../dto';
+import { GenericQueryParams } from 'src/global/dto/generic-query-params.dto';
 
 @Injectable()
 export class CategoryService {

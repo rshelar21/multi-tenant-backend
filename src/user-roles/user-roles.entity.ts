@@ -5,11 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToMany,
+  Index
 } from 'typeorm';
 import { UserRolesType, UserRolesIdType } from './enums/user-roles.enum';
 import { User } from 'src/users/user.entity';
 
 @Entity()
+@Index(['roleType'])
 export class UserRoles {
   @PrimaryGeneratedColumn('uuid')
   id: string;

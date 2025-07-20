@@ -8,11 +8,13 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index
 } from 'typeorm';
 import { Category } from './category.entity';
 import { Products } from 'src/products/products.entity';
 
 @Entity()
+@Index(['slug'])
 export class SubCategory {
   @PrimaryGeneratedColumn('uuid')
   id: string;

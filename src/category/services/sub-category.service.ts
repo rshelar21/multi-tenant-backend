@@ -14,6 +14,8 @@ import {
   CreateManyCategoryDto,
   CreateManySubCategoryDto,
 } from '../dto';
+import { PaginationProvider } from 'src/global/pagination/services/pagination.provider';
+import { GenericQueryParams } from 'src/global/dto/generic-query-params.dto';
 
 @Injectable()
 export class SubCategoryService {
@@ -25,12 +27,23 @@ export class SubCategoryService {
     private readonly subCategoryReposity: Repository<SubCategory>,
 
     private dataSource: DataSource,
+
+    private readonly paginationProvider: PaginationProvider,
   ) {}
 
-  public async getAllSubCategories() {
+  public async getAllSubCategories(genericQueryParams: GenericQueryParams) {
+    const { page, limit } = genericQueryParams;
     try {
-      const [data, count] = await this.subCategoryReposity.findAndCount();
-      return { data, count };
+      const data = await this.paginationProvider.paginateQuery(
+        {
+          limit,
+          page,
+        },
+        this.subCategoryReposity,
+      );
+      return data
+      // const [data, count] = await this.subCategoryReposity.findAndCount();
+      // return { data, count };
     } catch (err) {
       if (err instanceof BadRequestException) {
         throw err;

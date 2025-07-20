@@ -10,23 +10,24 @@ import { User } from 'src/users/user.entity';
 @Injectable()
 export class RefreshTokenProvider {
   constructor(
-    
     private readonly usersService: UsersService,
-    
+
     private readonly generateTokensProvider: GenerateTokensProvider,
-    
+
     private readonly jwtService: JwtService,
 
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
 
-  public async refreshToken(req: Request & {
-    user?: User
-  } , res: Response) {
+  public async refreshToken(
+    req: Request & {
+      user?: User;
+    },
+    res: Response,
+  ) {
     try {
-
-      const user = req?.user
+      const user = req?.user;
       // const token = req.cookies.refreshToken;
       // if (!token) {
       //   throw new BadRequestException('token not found');
@@ -48,6 +49,7 @@ export class RefreshTokenProvider {
           // secure: true, // use HTTPS
           // sameSite: 'lax', // CSRF protection
           maxAge: 30 * 60 * 1000, // 1 day
+          secure: process.env.NODE_ENV === 'production', // use HTTPS
         })
         .json({
           user,

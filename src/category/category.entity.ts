@@ -5,10 +5,12 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index
 } from 'typeorm';
 import { SubCategory } from './sub-category.entity';
 
 @Entity()
+@Index(['slug'])
 export class Category {
   @PrimaryGeneratedColumn('uuid')
   id: string;

@@ -14,6 +14,7 @@ import { RequestType } from 'src/global/types';
 import { UsersService } from 'src/users/services/users.service';
 import { OrdersService } from 'src/orders/services/orders.service';
 import { TenantsService } from 'src/tenants/services/tenants.service';
+import { UserRolesIdType } from 'src/user-roles/enums/user-roles.enum';
 
 @Injectable()
 export class StripeService {
@@ -33,6 +34,43 @@ export class StripeService {
     this.stripe = new Stripe(
       this.stripeConfiguration.stripeSecretKey as string,
     );
+  }
+
+  public async getRevenueDataails(req: RequestType) {
+    const isSuperAdmin = req?.user?.roles.some(
+      (i) => i.roleType === UserRolesIdType.SUPER_ADMIN,
+    );
+    try {
+      if (isSuperAdmin) {
+        const transfers = await this.stripe.balanceTransactions.list({
+          type: 'application_fee',
+        });
+        const netRevenue = transfers.data.reduce(
+          (acc, item) => acc + Number(item.net) / 100,
+          0,
+        );
+
+        return netRevenue?.toFixed(2);
+      } else {
+        const balanceTransactions = await this.stripe.balanceTransactions.list({
+          stripeAccount: 'acct_1Rk9UEIwiIDvZrN3', // connected account ID
+        });
+        const netRevenue = balanceTransactions.data?.reduce(
+          (acc, item) => acc + item.net / 100,
+          0,
+        );
+
+        return netRevenue?.toFixed(2);
+      }
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException(
+        'Failed to create user',
+        err.message,
+      );
+    }
   }
 
   public async processWebhook(request: RawBodyRequest<Request>) {

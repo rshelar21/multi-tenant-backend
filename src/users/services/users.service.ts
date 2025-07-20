@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { UserRolesService } from 'src/user-roles/services/user-roles.service';
 import { HashingProvider } from 'src/auth/providers/hashing.provider';
@@ -17,6 +17,9 @@ import { GenerateTokensProvider } from 'src/auth/providers/generate-tokens.provi
 import { Tenant } from 'src/tenants/tenants.entity';
 import stripeConfig from 'src/config/stripe.config';
 import { ConfigType } from '@nestjs/config';
+import { UpdateUserDto } from '../dtos/update-user.dto';
+import { UserRoles } from 'src/user-roles/user-roles.entity';
+import { UserRolesIdType } from 'src/user-roles/enums/user-roles.enum';
 @Injectable()
 export class UsersService {
   private stripe: Stripe;
@@ -33,7 +36,7 @@ export class UsersService {
     @Inject(stripeConfig.KEY)
     private readonly stripeConfiguration: ConfigType<typeof stripeConfig>,
 
-    // private readonly tenants
+    private readonly datasource: DataSource,
   ) {
     this.stripe = new Stripe(
       this.stripeConfiguration.stripeSecretKey as string,
@@ -175,10 +178,58 @@ export class UsersService {
         // secure: true, // use HTTPS
         // sameSite: 'lax', // CSRF protection
         maxAge: 30 * 60 * 1000, // 1 day
+        secure: process.env.NODE_ENV === 'production', // use HTTPS
       })
       .json({
         user,
         accessToken: tokens?.accessToken,
       });
+  }
+
+  public async updateUser(updateUserDto: UpdateUserDto) {
+    try {
+      const existingUser = await this.userRepository.findOne({
+        where: {
+          id: updateUserDto.id,
+        },
+        relations: {
+          roles: true,
+        },
+      });
+
+      if (!existingUser) {
+        throw new BadRequestException('User not found!');
+      }
+
+      let roles: UserRoles[] = [];
+
+      if (updateUserDto.roles?.includes(UserRolesIdType.SUPER_ADMIN)) {
+        throw new BadRequestException('Can not add roles');
+      }
+
+      if (updateUserDto.roles) {
+        const rolesResult = await this.userRolesService.getRoles({
+          roleIds: updateUserDto.roles,
+        });
+        roles = rolesResult?.data;
+      }
+
+      if (roles.length > 0) {
+        // If you want to merge:
+        existingUser.roles = Array.from(
+          new Set([...existingUser.roles, ...roles]),
+        );
+      }
+
+      await this.userRepository.save(existingUser);
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException(
+        'Failed to update user',
+        err.message,
+      );
+    }
   }
 }
