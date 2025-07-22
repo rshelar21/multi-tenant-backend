@@ -23,7 +23,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(helmet());
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL,
     methods: 'GET,POST,PUT,DELETE', // Allow HTTP methods
     credentials: true, // Allow cookies to be sent
     optionsSuccessStatus: 200,
