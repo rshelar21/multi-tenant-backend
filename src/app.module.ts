@@ -66,14 +66,26 @@ const ENV = process.env.NODE_ENV;
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         /// now load from congif file appConfi
+        // type: 'postgres',
+        // synchronize: configService.get('database.synchronize'),
+        // port: configService.get('database.port'),
+        // username: configService.get('database.user'),
+        // password: configService.get('database.password'),
+        // host: configService.get('database.host'),
+        // autoLoadEntities: configService.get('database.autoLoadEntities'),
+        // database: configService.get('database.name'),
         type: 'postgres',
-        synchronize: configService.get('database.synchronize'),
-        port: configService.get('database.port'),
-        username: configService.get('database.user'),
-        password: configService.get('database.password'),
-        host: configService.get('database.host'),
-        autoLoadEntities: configService.get('database.autoLoadEntities'),
-        database: configService.get('database.name'),
+        url: configService.get<string>('database.url'), // ← Supabase URL
+        synchronize: configService.get<boolean>('database.synchronize'),
+        autoLoadEntities: configService.get<boolean>(
+          'database.autoLoadEntities',
+        ),
+        ssl: true, // ← required for Supabase
+        extra: {
+          ssl: {
+            rejectUnauthorized: false, // Supabase uses self-signed certs
+          },
+        },
       }),
     }),
     UsersModule,
