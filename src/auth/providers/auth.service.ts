@@ -87,7 +87,7 @@ export class AuthService {
           secure:
             process.env.NODE_ENV === 'production' ||
             process.env.NODE_ENV === 'development', // use HTTPS
-          sameSite: 'lax', // CSRF protection
+          sameSite: 'none', // CSRF protection
           maxAge: 30 * 60 * 1000, // 1 day
         })
         .json({
