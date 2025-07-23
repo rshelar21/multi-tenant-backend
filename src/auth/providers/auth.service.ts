@@ -107,11 +107,17 @@ export class AuthService {
 
   public logout(req: RequestType, res: Response) {
     try {
-      const userId = req?.user;
-
-      res.clearCookie('refreshToken').json({
-        message: 'Logout success!',
-      });
+      res
+        .clearCookie('refreshToken', {
+          httpOnly: true, // JS can't access this cookie
+          secure:
+            process.env.NODE_ENV === 'production' ||
+            process.env.NODE_ENV === 'development',
+          sameSite: 'none',
+        })
+        .json({
+          message: 'Logout success!',
+        });
     } catch (err) {
       if (err instanceof BadRequestException) {
         throw err;
