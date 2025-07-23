@@ -107,7 +107,7 @@ const ENV = process.env.NODE_ENV;
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(RateLimitCreator(60000, 60))
+      .apply(RateLimitCreator(60000, 120)) // 1 * 60 * 1000 per 60
       .forRoutes('*')
       .apply(AuthMiddleware)
       .exclude(
