@@ -175,10 +175,11 @@ export class UsersService {
     res
       .cookie('refreshToken', tokens?.refreshToken, {
         httpOnly: true, // JS can't access this cookie
-        // secure: true, // use HTTPS
-        // sameSite: 'lax', // CSRF protection
+        secure:
+          process.env.NODE_ENV === 'production' ||
+          process.env.NODE_ENV === 'development', // use HTTPS
         maxAge: 30 * 60 * 1000, // 1 day
-        secure: process.env.NODE_ENV === 'production', // use HTTPS
+        sameSite: 'none',
       })
       .json({
         user,
