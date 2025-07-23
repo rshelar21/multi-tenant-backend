@@ -47,8 +47,10 @@ export class AuthService {
       res
         .cookie('refreshToken', token?.refreshToken, {
           httpOnly: true, // JS can't access this cookie
-          secure: process.env.NODE_ENV === 'production', // use HTTPS
-          // sameSite: 'lax', // CSRF protection // none
+          secure:
+            process.env.NODE_ENV === 'production' ||
+            process.env.NODE_ENV === 'development', // use HTTPS
+          // sameSite: 'none', // CSRF protection // none
           maxAge: 30 * 60 * 1000, // 1 day
         })
         .json({
@@ -56,7 +58,7 @@ export class AuthService {
           accessToken: token?.accessToken,
         });
     } catch (err) {
-      console.log(err)
+      console.log(err);
       if (err instanceof BadRequestException) {
         throw err;
       }
@@ -82,7 +84,9 @@ export class AuthService {
       res
         .cookie('refreshToken', token?.refreshToken, {
           httpOnly: true, // JS can't access this cookie
-          secure: process.env.NODE_ENV === 'production', // use HTTPS
+          secure:
+            process.env.NODE_ENV === 'production' ||
+            process.env.NODE_ENV === 'development', // use HTTPS
           // sameSite: 'lax', // CSRF protection
           maxAge: 30 * 60 * 1000, // 1 day
         })
