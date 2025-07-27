@@ -12,6 +12,10 @@ import { Request, Response } from 'express';
 import { GenerateTokensProvider } from './generate-tokens.provider';
 import { HashingProvider } from '../providers/hashing.provider';
 import { RequestType } from '../../global/types';
+import { UpdateUserPasswordDto } from '../dto/update-password.dto';
+import { User } from 'src/users/user.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +24,9 @@ export class AuthService {
     private readonly refreshTokenProvider: RefreshTokenProvider,
     private readonly generateTokenProvider: GenerateTokensProvider,
     private readonly hashingProvider: HashingProvider,
+
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   public async signIn(signInDto: SignInDto, res: Response) {
@@ -36,7 +43,7 @@ export class AuthService {
       );
 
       if (!isPasswordMatch) {
-        throw new BadRequestException('User not found');
+        throw new BadRequestException('Please check email or password');
       }
 
       const token = await this.generateTokenProvider.generateTokens(user);
@@ -62,7 +69,6 @@ export class AuthService {
           accessToken: token?.accessToken,
         });
     } catch (err) {
-      console.log(err);
       if (err instanceof BadRequestException) {
         throw err;
       }
@@ -143,5 +149,56 @@ export class AuthService {
 
   public refreshtoken(req: Request, res: Response) {
     return this.refreshTokenProvider.refreshToken(req, res);
+  }
+
+  async updatePassword(updateUserPasswordDto: UpdateUserPasswordDto) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: {
+          id: updateUserPasswordDto.id,
+        },
+        select: {
+          email: true,
+          password: true,
+          id: true,
+          name: true,
+          tenant: true,
+        },
+      });
+
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+
+      const isPasswordMatch = await this.hashingProvider.comparePassword(
+        updateUserPasswordDto?.oldPassword,
+        user?.password,
+      );
+
+      if (!isPasswordMatch) {
+        throw new BadRequestException('Please check  password');
+      }
+
+      const newPassord = await this.hashingProvider.hashPassword(
+        updateUserPasswordDto?.newPassword,
+      );
+
+      await this.userRepository.update(
+        { id: updateUserPasswordDto.id },
+        {
+          password: newPassord,
+        },
+      );
+
+      return { message: 'success' };
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException(
+        'Failed to update password',
+        err.message,
+      );
+    }
   }
 }

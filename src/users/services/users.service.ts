@@ -212,6 +212,10 @@ export class UsersService {
         throw new BadRequestException('Can not add roles');
       }
 
+      if (updateUserDto.password) {
+        throw new BadRequestException('Can not update');
+      }
+
       if (updateUserDto.roles) {
         const rolesResult = await this.userRolesService.getRoles({
           roleIds: updateUserDto.roles,

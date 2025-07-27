@@ -11,9 +11,8 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './services/users.service';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { RefreshTokenGuard } from 'src/auth/guards/refresh-token.guard';
-import { User } from './user.entity';
 import { RequestType } from 'src/global/types';
 import { UpdateUserDto } from './dtos/update-user.dto';
 

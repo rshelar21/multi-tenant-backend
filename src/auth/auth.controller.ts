@@ -13,6 +13,7 @@ import { SignInDto } from './dto/signIn.dto';
 import { Response } from 'express';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 import { RequestType } from '../global/types';
+import { UpdateUserPasswordDto } from './dto/update-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -28,6 +29,10 @@ export class AuthController {
     return this.authService.signUp(signUpDto, res);
   }
 
+  @Post('/change-password')
+  public updatePassword(@Body() updateUserPasswordDto: UpdateUserPasswordDto) {
+    return this.authService.updatePassword(updateUserPasswordDto);
+  }
 
   @UseGuards(RefreshTokenGuard)
   @Get('/refresh-token')
