@@ -44,8 +44,8 @@ export class ProductsController {
     return this.productsService.createProduct(req, createProductDto);
   }
 
-  @Post('/content')
-  public createProductContent(
+  @Patch('/content')
+  public updateProductContent(
     @Req() req: RequestType,
     @Body() contentDto: ContentDto,
   ) {
