@@ -4,14 +4,16 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   Req,
 } from '@nestjs/common';
-import { ProductsService } from './services/products.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { ProductsQueryParms } from './dto/product-query-params.dto';
 import { RequestType } from 'src/global/types';
+import { ProductsService } from './services/products.service';
+import { ContentDto, CreateProductDto } from './dto/create-product.dto';
+import { ProductsQueryParms } from './dto/product-query-params.dto';
+import { PatcProductDto } from './dto/update-product.dto';
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -42,8 +44,25 @@ export class ProductsController {
     return this.productsService.createProduct(req, createProductDto);
   }
 
+  @Post('/content')
+  public createProductContent(
+    @Req() req: RequestType,
+    @Body() contentDto: ContentDto,
+  ) {
+    return this.productsService.createProductContent(req, contentDto);
+  }
+
+  @Patch('/:id')
+  public updateProduct(
+    @Req() req: RequestType,
+    @Param('id') id: string,
+    @Body() updateProductDto: PatcProductDto,
+  ) {
+    return this.productsService.updateProduct(req, id, updateProductDto);
+  }
+
   @Delete()
-  public deleteProduct(@Body() id: string) {
-    return this.productsService.deleteProduct(id);
+  public deleteProduct(@Req() req: RequestType, @Body() body: { id: string }) {
+    return this.productsService.deleteProduct(req, body.id);
   }
 }

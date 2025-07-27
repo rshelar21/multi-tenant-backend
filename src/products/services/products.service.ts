@@ -14,12 +14,13 @@ import {
   FindOptionsRelations,
 } from 'typeorm';
 import { Products } from '../products.entity';
-import { CreateProductDto } from '../dto/create-product.dto';
+import { ContentDto, CreateProductDto } from '../dto/create-product.dto';
 import { SubCategoryService } from 'src/category/services/sub-category.service';
 import { ProductsQueryParms } from '../dto/product-query-params.dto';
 import { TagsService } from 'src/tags/services/tags.service';
 import { PaginationProvider } from 'src/global/pagination/services/pagination.provider';
 import { RequestType } from 'src/global/types';
+import { PatcProductDto } from '../dto/update-product.dto';
 @Injectable()
 export class ProductsService {
   constructor(
@@ -220,17 +221,122 @@ export class ProductsService {
     }
   }
 
-  public async deleteProduct(id: string) {
+  public async updateProduct(
+    req: RequestType,
+    id,
+    updateProductDto: PatcProductDto,
+  ) {
     try {
-      const existingProduct = await this.productsRepository.findOneBy({
-        id,
+      const existingProduct = await this.productsRepository.findOne({
+        where: {
+          id: id,
+        },
+        relations: {
+          user: true,
+          orders: true,
+          tags: true,
+        },
       });
 
       if (!existingProduct) {
-        throw new BadRequestException('Sub-Category not found');
+        throw new BadRequestException('Product not found!');
       }
 
-      return await this.productsRepository.delete(id);
+      if (existingProduct?.orders && existingProduct?.orders.length > 0) {
+        throw new BadRequestException(
+          'Cannot update product with existing orders',
+        );
+      }
+
+      if (updateProductDto?.category) {
+        const category = await this.subCategoryService.getSingleSubCategory(
+          updateProductDto?.category,
+        );
+        if (category) {
+          existingProduct.category = category;
+        }
+      }
+
+      if (updateProductDto?.tags) {
+        const { data } = await this.tagsService.getTagsByIds(
+          updateProductDto?.tags,
+        );
+
+        existingProduct.tags = [...data];
+      }
+
+      existingProduct.name = updateProductDto?.name || '';
+      existingProduct.description = updateProductDto?.description || '';
+      existingProduct.price = updateProductDto.price || '';
+      existingProduct.productImg = updateProductDto.productImg;
+      existingProduct.refundPolicy = updateProductDto.refundPolicy || '';
+
+      return await this.productsRepository.save(existingProduct);
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException('Failed to update', err.message);
+    }
+  }
+
+  async createProductContent(req: RequestType, contentDto: ContentDto) {
+    try {
+      const existingProduct = await this.productsRepository.findOneBy({
+        id: contentDto.id,
+      });
+
+      if (!existingProduct) {
+        throw new BadRequestException('Product not found!');
+      }
+
+      return await this.productsRepository.update(
+        {
+          id: contentDto.id,
+        },
+        {
+          content: JSON.parse(contentDto.content),
+        },
+      );
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException('Failed to create', err.message);
+    }
+  }
+
+  public async deleteProduct(req: RequestType, id: string) {
+    try {
+      const existingProduct = await this.productsRepository.findOne({
+        where: {
+          id: id,
+        },
+        relations: {
+          user: true,
+          orders: true,
+        },
+      });
+
+      if (existingProduct?.user.id !== req?.user?.id) {
+        throw new BadRequestException('You can not delete this product');
+      }
+
+      if (existingProduct?.orders && existingProduct?.orders.length > 0) {
+        throw new BadRequestException(
+          'Cannot delete product with existing orders',
+        );
+      }
+
+      if (!existingProduct) {
+        throw new BadRequestException('Product not found');
+      }
+
+      await this.productsRepository.delete(id);
+
+      return {
+        message: 'success',
+      };
     } catch (err) {
       if (err instanceof BadRequestException) {
         throw err;

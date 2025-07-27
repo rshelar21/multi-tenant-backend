@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
+import { RequestType } from 'src/global/types';
 import { CategoryService } from './services/category.service';
 import {
   CreateCategoryDto,
@@ -8,7 +18,6 @@ import {
 } from './dto';
 import { SubCategoryService } from './services/sub-category.service';
 import { GenericQueryParams } from 'src/global/dto/generic-query-params.dto';
-
 @Controller('category')
 export class CategoryController {
   constructor(
@@ -38,8 +47,11 @@ export class CategoryController {
   }
 
   @Post('/')
-  public createCategory(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoryService.createCategory(createCategoryDto);
+  public createCategory(
+    @Req() req: RequestType,
+    @Body() createCategoryDto: CreateCategoryDto,
+  ) {
+    return this.categoryService.createCategory(req, createCategoryDto);
   }
 
   @Post('/many')
@@ -61,15 +73,20 @@ export class CategoryController {
   //
 
   @Post('/sub-category')
-  public createSubCategory(@Body() createSubCategoryDto: CreateSubCategoryDto) {
-    return this.subCategoryService.createSubCategory(createSubCategoryDto);
+  public createSubCategory(
+    @Req() req: RequestType,
+    @Body() createSubCategoryDto: CreateSubCategoryDto,
+  ) {
+    return this.subCategoryService.createSubCategory(req, createSubCategoryDto);
   }
 
   @Post('/sub-category/many')
   public createManySubCategory(
+    @Req() req: RequestType,
     @Body() createManySubCategoryDto: CreateManySubCategoryDto,
   ) {
     return this.subCategoryService.createManySubCategory(
+      req,
       createManySubCategoryDto,
     );
   }

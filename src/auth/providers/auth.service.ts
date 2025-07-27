@@ -50,7 +50,11 @@ export class AuthService {
           secure:
             process.env.NODE_ENV === 'production' ||
             process.env.NODE_ENV === 'development', // use HTTPS
-          sameSite: 'none', // CSRF protection // none
+          sameSite:
+            process.env.NODE_ENV === 'production' ||
+            process.env.NODE_ENV === 'development'
+              ? 'none'
+              : 'lax', // CSRF protection // none
           maxAge: 30 * 60 * 1000, // 1 day
         })
         .json({
@@ -87,7 +91,11 @@ export class AuthService {
           secure:
             process.env.NODE_ENV === 'production' ||
             process.env.NODE_ENV === 'development', // use HTTPS
-          sameSite: 'none', // CSRF protection
+          sameSite:
+            process.env.NODE_ENV === 'production' ||
+            process.env.NODE_ENV === 'development'
+              ? 'none'
+              : 'lax', // CSRF protection // none
           maxAge: 30 * 60 * 1000, // 1 day
         })
         .json({
@@ -113,7 +121,11 @@ export class AuthService {
           secure:
             process.env.NODE_ENV === 'production' ||
             process.env.NODE_ENV === 'development',
-          sameSite: 'none',
+          sameSite:
+            process.env.NODE_ENV === 'production' ||
+            process.env.NODE_ENV === 'development'
+              ? 'none'
+              : 'lax', // CSRF protection // none
         })
         .json({
           message: 'Logout success!',

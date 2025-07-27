@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsEnum,
+  IsJSON,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -43,4 +44,14 @@ export class CreateProductDto {
   @IsArray()
   @IsOptional()
   tags?: string[];
+}
+
+export class ContentDto {
+  @IsJSON()
+  @IsNotEmpty()
+  content: string;
+
+  @IsString()
+  @IsNotEmpty()
+  id: string;
 }

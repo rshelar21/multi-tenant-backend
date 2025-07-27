@@ -66,8 +66,10 @@ export class AnalyticsService {
         take: 5,
         ...(!isSuperAdmin && {
           where: {
-            user: {
-              id: req?.user?.id,
+            product: {
+              user: {
+                id: req?.user?.id,
+              },
             },
           },
         }),

@@ -8,7 +8,8 @@ import { DataSource, In, Repository } from 'typeorm';
 import { Category } from '../category.entity';
 import { SubCategory } from '../sub-category.entity';
 import { CreateCategoryDto, CreateManyCategoryDto } from '../dto';
-import { GenericQueryParams } from 'src/global/dto/generic-query-params.dto';
+import { RequestType } from 'src/global/types';
+import { UserRolesIdType } from 'src/user-roles/enums/user-roles.enum';
 
 @Injectable()
 export class CategoryService {
@@ -52,8 +53,16 @@ export class CategoryService {
       );
     }
   }
-  public async createCategory(createCategoryDto: CreateCategoryDto) {
+  public async createCategory(
+    req: RequestType,
+    createCategoryDto: CreateCategoryDto,
+  ) {
     try {
+      if (
+        req.user?.roles.some((i) => i.roleType === UserRolesIdType.SUPER_ADMIN)
+      ) {
+        throw new BadRequestException('Can not create category');
+      }
       const existingCategory = await this.categoryReposity.findOneBy({
         name: createCategoryDto?.name,
       });

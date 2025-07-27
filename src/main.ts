@@ -24,7 +24,7 @@ async function bootstrap() {
   app.use(helmet());
   app.enableCors({
     origin: process.env.FRONTEND_URL,
-    methods: 'GET,POST,PUT,DELETE', // Allow HTTP methods
+    methods: 'GET,POST,PUT,DELETE,PATCH', // Allow HTTP methods
     credentials: true, // Allow cookies to be sent
     optionsSuccessStatus: 200,
     exposedHeaders: ['set-cookie'],

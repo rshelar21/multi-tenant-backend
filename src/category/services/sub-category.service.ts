@@ -1,21 +1,13 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Category } from '../category.entity';
 import { SubCategory } from '../sub-category.entity';
-import {
-  CreateCategoryDto,
-  CreateSubCategoryDto,
-  CreateManyCategoryDto,
-  CreateManySubCategoryDto,
-} from '../dto';
+import { CreateSubCategoryDto, CreateManySubCategoryDto } from '../dto';
 import { PaginationProvider } from 'src/global/pagination/services/pagination.provider';
 import { GenericQueryParams } from 'src/global/dto/generic-query-params.dto';
+import { RequestType } from 'src/global/types';
+import { UserRolesIdType } from 'src/user-roles/enums/user-roles.enum';
 
 @Injectable()
 export class SubCategoryService {
@@ -41,7 +33,7 @@ export class SubCategoryService {
         },
         this.subCategoryReposity,
       );
-      return data
+      return data;
       // const [data, count] = await this.subCategoryReposity.findAndCount();
       // return { data, count };
     } catch (err) {
@@ -71,8 +63,16 @@ export class SubCategoryService {
     }
   }
 
-  public async createSubCategory(createSubCategoryDto: CreateSubCategoryDto) {
+  public async createSubCategory(
+    req: RequestType,
+    createSubCategoryDto: CreateSubCategoryDto,
+  ) {
     try {
+      if (
+        req.user?.roles.some((i) => i.roleType === UserRolesIdType.SUPER_ADMIN)
+      ) {
+        throw new BadRequestException('Can not create category');
+      }
       const existingCategory = await this.subCategoryReposity.findOneBy({
         name: createSubCategoryDto?.name,
       });
@@ -99,12 +99,18 @@ export class SubCategoryService {
   }
 
   public async createManySubCategory(
+    req: RequestType,
     createManySubCategoryDto: CreateManySubCategoryDto,
   ) {
     // Create Query Runner Instance
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
+      if (
+        req.user?.roles.some((i) => i.roleType === UserRolesIdType.SUPER_ADMIN)
+      ) {
+        throw new BadRequestException('Can not create category');
+      }
       // Connect the query ryunner to the datasource
       await queryRunner.connect();
 
@@ -112,8 +118,8 @@ export class SubCategoryService {
       await queryRunner.startTransaction();
 
       for (let c of createManySubCategoryDto?.category) {
-        const newUser = queryRunner.manager.create(SubCategory, c); // entityClass, data
-        await queryRunner.manager.save(newUser);
+        const newCategory = queryRunner.manager.create(SubCategory, c); // entityClass, data
+        await queryRunner.manager.save(newCategory);
       }
 
       // if success

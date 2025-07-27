@@ -88,4 +88,10 @@ export class Products {
 
   @UpdateDateColumn()
   updateDate: Date;
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+  })
+  content: Record<string, any>;
 }

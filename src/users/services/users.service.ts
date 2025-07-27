@@ -179,7 +179,11 @@ export class UsersService {
           process.env.NODE_ENV === 'production' ||
           process.env.NODE_ENV === 'development', // use HTTPS
         maxAge: 30 * 60 * 1000, // 1 day
-        sameSite: 'none',
+        sameSite:
+          process.env.NODE_ENV === 'production' ||
+          process.env.NODE_ENV === 'development'
+            ? 'none'
+            : 'lax', // CSRF protection // none
       })
       .json({
         user,

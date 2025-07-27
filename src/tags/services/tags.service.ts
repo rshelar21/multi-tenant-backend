@@ -49,6 +49,7 @@ export class TagsService {
       const [data, count] = await this.tagsRepository.findAndCountBy({
         id: In(ids),
       });
+
       return { data, count };
     } catch (err) {
       if (err instanceof BadRequestException) {
@@ -105,7 +106,7 @@ export class TagsService {
       throw new InternalServerErrorException('Failed to create', err.message);
     }
   }
-  
+
   public async deleteTag(id: string) {
     try {
     } catch (err) {
