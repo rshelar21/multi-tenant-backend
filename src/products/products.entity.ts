@@ -18,6 +18,7 @@ import { Orders } from 'src/orders/orders.entity';
 import { Reviews } from 'src/reviews/reviews.entity';
 
 @Entity()
+@Index(['name'])
 export class Products {
   @PrimaryGeneratedColumn('uuid')
   id: string;

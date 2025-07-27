@@ -12,6 +12,7 @@ import {
   LessThanOrEqual,
   In,
   FindOptionsRelations,
+  ILike,
 } from 'typeorm';
 import { Products } from '../products.entity';
 import { ContentDto, CreateProductDto } from '../dto/create-product.dto';
@@ -51,6 +52,7 @@ export class ProductsService {
         access,
         tenantSlug,
         ids,
+        q,
       } = productsQueryParms;
 
       if (parentSlug || slug) {
@@ -97,6 +99,10 @@ export class ProductsService {
         where.user = {
           id: req.user.id,
         };
+      }
+
+      if (q) {
+        where.name = ILike(`%${q}%`);
       }
 
       const relations: FindOptionsRelations<Products> = {
