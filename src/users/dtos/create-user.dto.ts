@@ -4,6 +4,7 @@ import {
   IsArray,
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -43,4 +44,10 @@ export class CreateUserDto {
   @MinLength(3)
   @MaxLength(96)
   username: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  @MaxLength(512)
+  storeImg?: string;
 }

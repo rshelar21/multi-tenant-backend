@@ -102,7 +102,7 @@ export class AnalyticsService {
         totalProducts,
         orders,
         count,
-        topProducts: [totalRevenueResult],
+        topProducts: [...(totalRevenueResult || [])],
       };
     } catch (err) {
       if (err instanceof BadRequestException) {

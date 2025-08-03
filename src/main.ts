@@ -29,6 +29,7 @@ async function bootstrap() {
 
       if (
         !origin || // allow requests without origin (e.g., Postman, curl)
+        origin.startsWith('http://localhost') ||
         origin === allowedRoot ||
         subdomainRegex.test(origin)
       ) {

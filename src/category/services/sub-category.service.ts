@@ -1,6 +1,16 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import {
+  DataSource,
+  FindOptionsRelations,
+  FindOptionsSelect,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
 import { Category } from '../category.entity';
 import { SubCategory } from '../sub-category.entity';
 import { CreateSubCategoryDto, CreateManySubCategoryDto } from '../dto';
@@ -26,16 +36,30 @@ export class SubCategoryService {
   public async getAllSubCategories(genericQueryParams: GenericQueryParams) {
     const { page, limit } = genericQueryParams;
     try {
+      const relations: FindOptionsRelations<SubCategory> = {
+        category: true,
+      };
+      const where: FindOptionsWhere<SubCategory> = {};
+
+      const select: FindOptionsSelect<SubCategory> = {
+        category: {
+          id: true,
+          name: true,
+        },
+      };
+
       const data = await this.paginationProvider.paginateQuery(
         {
           limit,
           page,
         },
         this.subCategoryReposity,
+        where,
+        relations,
+        select,
       );
+
       return data;
-      // const [data, count] = await this.subCategoryReposity.findAndCount();
-      // return { data, count };
     } catch (err) {
       if (err instanceof BadRequestException) {
         throw err;

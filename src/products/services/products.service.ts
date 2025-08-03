@@ -95,7 +95,7 @@ export class ProductsService {
         where.id = In(idsList);
       }
 
-      if (req.user && access !== 'admin') {
+      if (req.user && access === 'user') {
         where.user = {
           id: req.user.id,
         };

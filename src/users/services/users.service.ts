@@ -230,7 +230,9 @@ export class UsersService {
         );
       }
 
-      await this.userRepository.save(existingUser);
+      existingUser.tenant.storeImg = updateUserDto.storeImg;
+
+      return await this.userRepository.save(existingUser);
     } catch (err) {
       if (err instanceof BadRequestException) {
         throw err;
