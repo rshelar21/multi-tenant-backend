@@ -53,7 +53,7 @@ export class StripeService {
         return netRevenue?.toFixed(2);
       } else {
         const balanceTransactions = await this.stripe.balanceTransactions.list({
-          stripeAccount: 'acct_1Rk9UEIwiIDvZrN3', // connected account ID
+          stripeAccount: req.user?.tenant.stripeAccountId, // connected account ID
         });
         const netRevenue = balanceTransactions.data?.reduce(
           (acc, item) => acc + item.net / 100,
