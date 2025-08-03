@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { Request, Response, NextFunction } from 'express';
 import jwtConfig from 'src/config/jwt.config';
 import { UsersService } from 'src/users/services/users.service';
@@ -33,9 +33,8 @@ export class AuthMiddleware implements NestMiddleware {
   ) {
     const token = this.extractTokenFromHeader(req);
 
-
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Access Token not found');
     }
 
     try {
@@ -51,6 +50,9 @@ export class AuthMiddleware implements NestMiddleware {
 
       next();
     } catch (err) {
+      if (err instanceof TokenExpiredError) {
+        throw new UnauthorizedException('Access token has expired');
+      }
       throw new UnauthorizedException();
     }
   }

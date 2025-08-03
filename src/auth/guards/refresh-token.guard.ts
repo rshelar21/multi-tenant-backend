@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import jwtConfig from 'src/config/jwt.config';
 import { UsersService } from 'src/users/services/users.service';
 
@@ -43,6 +43,9 @@ export class RefreshTokenGuard implements CanActivate {
 
       request.user = user;
     } catch (err) {
+      if (err instanceof TokenExpiredError) {
+        throw new UnauthorizedException('Refresh Token Expried!');
+      }
       throw new UnauthorizedException();
     }
     return true;
