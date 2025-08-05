@@ -86,14 +86,20 @@ export class PaymentsService {
           },
         }));
 
+      let returnUrl = '';
+
+      if (process.env.NODE_ENV === 'development') {
+        returnUrl = `https://${createCheckoutDto?.tenantSlug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/checkout`;
+      }
+
       const session = await this.stripe.checkout.sessions.create(
         {
           line_items: productItems,
           mode: 'payment',
           // payment_method_types: ['card'],
           customer_email: user?.email,
-          success_url: `${this.frontendUrl}/tenants/${createCheckoutDto?.tenantSlug}/checkout?success=true`,
-          cancel_url: `${this.frontendUrl}/tenants/${createCheckoutDto?.tenantSlug}/checkout?cancel=false`,
+          success_url: `${returnUrl}?success=true`,
+          cancel_url: `${returnUrl}?cancel=false`,
           invoice_creation: {
             enabled: true,
           },
