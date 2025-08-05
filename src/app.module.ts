@@ -66,6 +66,7 @@ const ENV = process.env.NODE_ENV;
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         /// now load from congif file appConfi
+        // local
         // type: 'postgres',
         // synchronize: configService.get('database.synchronize'),
         // port: configService.get('database.port'),
@@ -74,6 +75,8 @@ const ENV = process.env.NODE_ENV;
         // host: configService.get('database.host'),
         // autoLoadEntities: configService.get('database.autoLoadEntities'),
         // database: configService.get('database.name'),
+
+        // dev
         type: 'postgres',
         url: configService.get<string>('database.url'), // ← Supabase URL
         synchronize: configService.get<boolean>('database.synchronize'),
@@ -116,7 +119,7 @@ export class AppModule {
         '/users/me',
         '/auth/sign-in',
         '/auth/sign-up',
-        'stripe/webhook',
+        { path: '/stripe/webhook', method: RequestMethod.POST },
       )
       .forRoutes('*');
   }
