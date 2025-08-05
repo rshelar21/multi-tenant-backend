@@ -86,11 +86,11 @@ export class PaymentsService {
           },
         }));
 
-      let returnUrl = '';
+      // let returnUrl = '';
 
-      if (process.env.NODE_ENV === 'development') {
-        returnUrl = `https://${createCheckoutDto?.tenantSlug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/checkout`;
-      }
+      // if (process.env.NODE_ENV === 'development') {
+      //   returnUrl = `https://${createCheckoutDto?.tenantSlug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/checkout`;
+      // }
 
       const session = await this.stripe.checkout.sessions.create(
         {
@@ -98,8 +98,8 @@ export class PaymentsService {
           mode: 'payment',
           // payment_method_types: ['card'],
           customer_email: user?.email,
-          success_url: `${returnUrl}?success=true`,
-          cancel_url: `${returnUrl}?cancel=false`,
+          success_url: `${this.frontendUrl}?success=true`,
+          cancel_url: `${this.frontendUrl}?cancel=false`,
           invoice_creation: {
             enabled: true,
           },
