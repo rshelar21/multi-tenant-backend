@@ -73,6 +73,22 @@ export class StripeService {
     }
   }
 
+  public async getConnectStatus() {
+    try {
+      const account = await this.stripe.accounts.retrieve(''); // put id here
+      console.log(account);
+      return account;
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      throw new InternalServerErrorException(
+        'Failed to create user',
+        err.message,
+      );
+    }
+  }
+
   public async processWebhook(request: RawBodyRequest<Request>) {
     const stripeSignature = request.headers['stripe-signature'];
     const data = request.rawBody;
@@ -110,8 +126,10 @@ export class StripeService {
     switch (event.type) {
       case 'checkout.session.completed':
         const data = event.data.object as Stripe.Checkout.Session;
+        console.log({ data });
 
         try {
+          console.log({ meta: data.metadata });
           if (!data?.metadata?.userId) {
             throw new BadRequestException('User id is required');
           }
@@ -121,15 +139,6 @@ export class StripeService {
           if (!user) {
             throw new BadRequestException('User not found');
           }
-
-          // const session = await this.stripe.checkout.sessions.retrieve(
-          //   data.id,
-          //   {
-          //     expand: ['line_items'],
-          //   },
-          // );
-
-          // const lineItems = session.line_items;
 
           return await this.ordersService.createOrder({
             stripeCheckoutSessionId: data?.id,

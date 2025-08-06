@@ -152,6 +152,7 @@ export class OrdersService {
   }
 
   public async createOrder(createOrderDto: CreateOrderDto) {
+    console.log({ createOrderDto });
     try {
       const products = await this.productsService.getManyProducts(
         createOrderDto?.productIds,
