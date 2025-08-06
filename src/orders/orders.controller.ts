@@ -12,6 +12,7 @@ import { OrdersService } from './services/orders.service';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { OrdersQueryParms } from './dtos/orders-query.dto';
 import { RequestType } from 'src/global/types';
+import { Request } from 'express';
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
@@ -25,8 +26,11 @@ export class OrdersController {
   }
 
   @Get('/product')
-  public getSingleOrderByProduct(@Query() query: { productId: string }) {
-    return this.ordersService.getSingleOrderByProduct(query?.productId);
+  public getSingleOrderByProduct(
+    @Req() req: Request,
+    @Query() query: { productId: string },
+  ) {
+    return this.ordersService.getSingleOrderByProduct(req, query?.productId);
   }
 
   @Get('/:id')

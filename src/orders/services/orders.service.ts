@@ -16,6 +16,7 @@ import { ProductsService } from 'src/products/services/products.service';
 import { OrdersQueryParms } from '../dtos/orders-query.dto';
 import { RequestType } from 'src/global/types';
 import { PaginationProvider } from 'src/global/pagination/services/pagination.provider';
+import { Request } from 'express';
 @Injectable()
 export class OrdersService {
   constructor(
@@ -120,13 +121,18 @@ export class OrdersService {
     }
   }
 
-  public async getSingleOrderByProduct(productId: string) {
+  public async getSingleOrderByProduct(req: Request, productId: string) {
     try {
       const where: FindOptionsWhere<Orders> = {};
 
       if (productId) {
         where.product = {
           id: productId,
+        };
+      }
+      if (req.user.id) {
+        where.user = {
+          id: req.user.id,
         };
       }
       return this.ordersRepository?.findOne({
