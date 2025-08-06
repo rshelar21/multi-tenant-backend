@@ -119,7 +119,7 @@ export class AppModule {
         '/users/me',
         '/auth/sign-in',
         '/auth/sign-up',
-        { path: '/stripe/webhook', method: RequestMethod.ALL },
+        { path: '/api/stripe/webhook', method: RequestMethod.ALL },
       )
       .forRoutes('*');
   }
