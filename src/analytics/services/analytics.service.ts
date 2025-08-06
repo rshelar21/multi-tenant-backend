@@ -95,14 +95,14 @@ export class AnalyticsService {
         });
       }
 
-      const totalRevenueResult = await totalRevenueQuery.getRawOne();
+      const totalRevenueResult = await totalRevenueQuery.getRawMany();
 
       return {
         totalUsers,
         totalProducts,
         orders,
         count,
-        topProducts: [...(totalRevenueResult || [])],
+        topProducts: [...totalRevenueResult],
       };
     } catch (err) {
       if (err instanceof BadRequestException) {
