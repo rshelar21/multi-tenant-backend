@@ -1,4 +1,5 @@
 import { Products } from 'src/products/products.entity';
+import { User } from 'src/users/user.entity';
 import {
   Column,
   Entity,
@@ -6,7 +7,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToMany,
-  Index
+  Index,
+  JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 
 @Entity()
@@ -25,6 +28,12 @@ export class Tags {
 
   @ManyToMany(() => Products, (Products) => Products.tags)
   products: Products;
+
+  @ManyToOne(() => User, (user) => user.tags, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  user: User;
 
   @CreateDateColumn()
   createDate: Date;

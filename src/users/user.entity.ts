@@ -17,6 +17,7 @@ import { Tenant } from 'src/tenants/tenants.entity';
 import { Products } from 'src/products/products.entity';
 import { Orders } from 'src/orders/orders.entity';
 import { Reviews } from 'src/reviews/reviews.entity';
+import { Tags } from 'src/tags/tags.entity';
 
 @Entity()
 @Index(['username', 'email'])
@@ -81,6 +82,11 @@ export class User {
   @OneToMany(() => Reviews, (reviews) => reviews.user)
   @JoinTable()
   reviews: Reviews[];
+
+  @OneToMany(() => Tags, (tag) => tag.user, {
+    cascade: true,
+  })
+  tags: Tags[];
 
   @CreateDateColumn()
   createdAt: Date;

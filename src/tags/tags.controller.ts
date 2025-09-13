@@ -1,15 +1,29 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { TagsService } from './services/tags.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { GenericQueryParams } from 'src/global/dto/generic-query-params.dto';
+import { RequestType } from 'src/global/types';
+import { Request } from 'express';
 
 @Controller('tags')
 export class TagsController {
   constructor(private readonly tagsService: TagsService) {}
 
   @Get()
-  public getAllTags(@Query() genericQueryParams: GenericQueryParams) {
-    return this.tagsService.getAllTags(genericQueryParams);
+  public getAllTags(
+    @Query() genericQueryParams: GenericQueryParams,
+    @Req() req: Request,
+  ) {
+    return this.tagsService.getAllTags(genericQueryParams, req);
   }
 
   @Get('/:id')
@@ -18,8 +32,12 @@ export class TagsController {
   }
 
   @Post()
-  public createTag(@Body() createTagDto: CreateTagDto) {
-    return this.tagsService.createTag(createTagDto);
+  public createTag(
+    @Body() createTagDto: CreateTagDto,
+    @Req()
+    req: Request,
+  ) {
+    return this.tagsService.createTag(createTagDto, req);
   }
 
   @Delete()

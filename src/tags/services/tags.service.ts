@@ -2,13 +2,20 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Req,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Tags } from '../tags.entity';
-import { In, Repository } from 'typeorm';
+import {
+  FindOptionsRelations,
+  FindOptionsWhere,
+  In,
+  Repository,
+} from 'typeorm';
 import { CreateTagDto } from '../dto/create-tag.dto';
 import { GenericQueryParams } from 'src/global/dto/generic-query-params.dto';
 import { PaginationProvider } from 'src/global/pagination/services/pagination.provider';
+import { Request } from 'express';
 
 @Injectable()
 export class TagsService {
@@ -19,15 +26,33 @@ export class TagsService {
     private readonly paginationProvider: PaginationProvider,
   ) {}
 
-  public async getAllTags(genericQueryParams: GenericQueryParams) {
+  public async getAllTags(
+    genericQueryParams: GenericQueryParams,
+    @Req() req: Request,
+  ) {
     try {
       const { page, limit } = genericQueryParams;
+
+      const where: FindOptionsWhere<Tags> = {};
+
+      if (req?.user) {
+        where.user = {
+          id: req?.user?.id,
+        };
+      }
+
+      const relations: FindOptionsRelations<Tags> = {
+        user: true,
+      };
+
       const tags = await this.paginationProvider.paginateQuery(
         {
           limit,
           page,
         },
         this.tagsRepository,
+        where,
+        relations,
       );
 
       // const [data, count] = await this.tagsRepository.findAndCount({
@@ -86,7 +111,7 @@ export class TagsService {
     }
   }
 
-  public async createTag(createTagDto: CreateTagDto) {
+  public async createTag(createTagDto: CreateTagDto, req: Request) {
     try {
       const existingTag = await this.tagsRepository.findOneBy({
         name: createTagDto?.name,
@@ -96,6 +121,7 @@ export class TagsService {
       }
       const newTag = await this.tagsRepository.create({
         name: createTagDto?.name,
+        user: req?.user,
       });
 
       return this.tagsRepository.save(newTag);
